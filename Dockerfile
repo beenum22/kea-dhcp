@@ -8,7 +8,9 @@ RUN yum update -y &&  \
 	yum install -y --nogpgcheck git gcc-c++ bc make automake libtool boost boost-devel sqlite-devel lbzip2 pkg-config openssl-devel wget && \
 	wget https://sourceforge.net/projects/log4cplus/files/log4cplus-stable/1.1.3/log4cplus-1.1.3-rc7.tar.bz2 && \
 	tar xf log4cplus-1.1.3-rc7.tar.bz2 && \
-	cd log4cplus-1.1.3-rc7 && make && make install &&\
+	cd log4cplus-1.1.3-rc7 && \
+	./configure --prefix=/opt/log4cplus && \
+	make && make install && \
 	cd && git clone https://github.com/isc-projects/kea && \
 	cd kea && \
 	autoreconf --install && \
