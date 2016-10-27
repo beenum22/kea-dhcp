@@ -1,13 +1,20 @@
-FROM postgres
+FROM centos:latest
 MAINTAINER Muneeb Ahmad <beenum>
 WORKDIR /root
-RUN apt-get update -y && \
-	apt-get install -y git liblog4cplus-dev libboost-dev libbotan1.10-dev postgresql-client dh-autoreconf libssl-dev openssl postgresql-server-dev-all libboost-system-dev && \
-	git clone https://github.com/isc-projects/kea && \
+EXPOSE 67/udp
+VOLUME /var/lib/kea
+RUN yum update -y &&  \
+	yum install -y epel-release initscripts && \
+	yum install -y --nogpgcheck git gcc-c++ bc make automake libtool boost boost-devel sqlite-devel lbzip2 pkg-config openssl-devel && \
+	wget https://sourceforge.net/projects/log4cplus/files/log4cplus-stable/1.1.3/log4cplus-1.1.3-rc7.tar.bz2 && \
+	tar xf log4cplus-1.1.3-rc7.tar.bz2 && \
+	cd log4cplus-1.1.3-rc7 && make && make install &&\
+	cd && git clone https://github.com/isc-projects/kea && \
 	cd kea && \
 	autoreconf --install && \
-	./configure --with-log4cplus=/usr/include/ --with-dhcp-pgsql=/usr/bin/pg_config --with-boost-include=/usr/include/ --prefix=/opt/kea && \
+	./configure --with-dhcp-pgsql=/usr/bin/pg_config --with-boost-include=/usr/include/ --with-log4cplus=/opt/log4cplus --prefix=/opt/kea && \
 	make && make install && \
-	apt-get clean && \
-	rm -rf /var/lib/apt/lists/* && \
-	cd && rm -rf kea/
+	cd && rm -rf * && \
+	yum clean all
+ENTRYPOINT [ "/opt/kea/sbin/kea-dhcp4" ]
+CMD ["-c", "/opt/kea/etc/kea/kea.conf"]
